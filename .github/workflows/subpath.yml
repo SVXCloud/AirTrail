@@ -2,7 +2,7 @@ name: Subpath validation and stable releases
 
 on:
   pull_request:
-    branches: [main, subpath]
+    branches: [main, subpath, 'stable/**']
   push:
     branches: [subpath]
   schedule:

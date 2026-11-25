@@ -206,7 +206,7 @@ test('OAuth discovery, protected-resource challenges, PKCE request, and scoped l
     redirect_uri: redirectUri,
     response_type: 'code',
     resource: url('/api/v1'),
-    scope: 'flight.read.own',
+    scope: 'profile.read',
     code_challenge: challenge,
     code_challenge_method: 'S256',
   });
@@ -226,7 +226,7 @@ test('OAuth discovery, protected-resource challenges, PKCE request, and scoped l
     {
       id: requestId,
       decision: 'approve',
-      scope: 'flight.read.own',
+      scope: 'profile.read',
     },
     cookies,
   );
