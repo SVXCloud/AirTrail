@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { PageHeader } from '../index';
 
   import EditUserForm from './EditUserForm.svelte';
@@ -25,7 +26,7 @@
           </span>
         </div>
       </div>
-      <form method="POST" action="/log-out">
+      <form method="POST" action={appPath('/log-out')}>
         <Button variant="destructiveOutline">Log out</Button>
       </form>
     </div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { LoaderCircle } from '@o7/icon/lucide';
   import { onMount } from 'svelte';
   import { toast } from 'svelte-sonner';
@@ -29,7 +30,7 @@
 
   onMount(async () => {
     if (!isSetup) {
-      await goto('/setup');
+      await goto(appPath('/setup'));
       return;
     }
 
@@ -46,7 +47,7 @@
 
     if (isOAuthCallback(page.url.search)) {
       oauthLoading = true;
-      const resp = await fetch('/api/oauth/callback', {
+      const resp = await fetch(appPath('/api/oauth/callback'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -71,18 +72,18 @@
           $formData.oauthLinkToken = err.linkToken;
           oauthLinkRequired = true;
           oauthLoading = false;
-          window.history.replaceState({}, '', '/login');
+          window.history.replaceState({}, '', appPath('/login'));
           return;
         }
 
-        await goto('/login', { replaceState: true }); // clear potential query params
+        await goto(appPath('/login'), { replaceState: true }); // clear potential query params
         toast.error(err.message ?? 'OAuth login failed');
         oauthLoading = false;
         return;
       }
 
       const result: { redirectTo?: string } = await resp.json();
-      await goto(result.redirectTo ?? '/', { invalidateAll: true });
+      await goto(result.redirectTo ?? appPath('/'), { invalidateAll: true });
       return;
     }
 
@@ -91,7 +92,7 @@
       !window.location.search.includes('autoLogin=false')
     ) {
       autoLoggingIn = true;
-      await goto('/login?autoLogin=false', { replaceState: true });
+      await goto(appPath('/login?autoLogin=false'), { replaceState: true });
       await oauthLogin();
       return;
     }
@@ -111,7 +112,7 @@
 
   const oauthLogin = async () => {
     oauthLoading = true;
-    const redirect = window.location.toString().split('?')[0];
+    const redirect = window.location.origin + appPath('/login');
     if (!redirect) return;
 
     try {
@@ -155,7 +156,7 @@
           </p>
         </div>
         {#if page.data.demo}
-          <Button href="/demo" data-sveltekit-reload size="lg">
+          <Button href={appPath('/demo')} data-sveltekit-reload size="lg">
             Explore the demo
           </Button>
           <p class="-mt-2 text-center text-sm text-muted-foreground">
@@ -173,7 +174,7 @@
           {/if}
           <form
             use:enhance
-            action="/api/users/login"
+            action={appPath('/api/users/login')}
             method="POST"
             class="grid gap-4"
           >

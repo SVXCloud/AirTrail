@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { Copy, ExternalLink, Trash2 } from '@o7/icon/lucide';
   import { toast } from 'svelte-sonner';
 
@@ -40,7 +41,7 @@
   };
 
   async function copyShareUrl(slug: string) {
-    const url = `${window.location.origin}/share/${slug}`;
+    const url = `${window.location.origin}${appPath(`/share/${slug}`)}`;
     try {
       await navigator.clipboard.writeText(url);
       toast.success('Share URL copied to clipboard');
@@ -165,7 +166,7 @@
                       variant="outline"
                       size="icon"
                       onclick={() =>
-                        window.open(`/share/${share.slug}`, '_blank')}
+                        window.open(appPath(`/share/${share.slug}`), '_blank')}
                     >
                       <ExternalLink size={16} />
                     </Button>

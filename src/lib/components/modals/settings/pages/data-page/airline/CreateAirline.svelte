@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { Plus } from '@o7/icon/lucide';
   import { toast } from 'svelte-sonner';
   import { defaults, type Infer, superForm } from 'sveltekit-superforms';
@@ -34,7 +35,7 @@
     formData.append('airlineId', airlineId.toString());
 
     try {
-      const response = await fetch('/api/airline/icon', {
+      const response = await fetch(appPath('/api/airline/icon'), {
         method: 'POST',
         body: formData,
       });
@@ -96,7 +97,7 @@
   <ModalBody>
     <form
       method="POST"
-      action="/api/airline/save/form"
+      action={appPath('/api/airline/save/form')}
       class="grid gap-4"
       use:enhance
     >

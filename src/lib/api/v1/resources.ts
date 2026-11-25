@@ -1,3 +1,4 @@
+import { appPath } from '$lib/app-path';
 import { MCP_DEFAULT_SCOPES } from './scopes';
 
 export type ProtectedResource = {
@@ -18,13 +19,13 @@ export type ProtectedResourceKey = keyof typeof PROTECTED_RESOURCES;
 export const protectedResourceUrl = (
   origin: string,
   key: ProtectedResourceKey,
-) => `${origin}${PROTECTED_RESOURCES[key].path}`;
+) => `${origin}${appPath(PROTECTED_RESOURCES[key].path)}`;
 
 export const protectedResourceMetadataUrl = (
   origin: string,
   key: ProtectedResourceKey,
 ) =>
-  `${origin}/.well-known/oauth-protected-resource${PROTECTED_RESOURCES[key].path}`;
+  `${origin}/.well-known/oauth-protected-resource${appPath(PROTECTED_RESOURCES[key].path)}`;
 
 /** The resource a `resource` parameter names, or null when it names none of ours. */
 export const protectedResourceKey = (

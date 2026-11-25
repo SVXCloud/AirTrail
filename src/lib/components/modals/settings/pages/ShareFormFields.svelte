@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import type { Infer, SuperForm } from 'sveltekit-superforms';
 
   import DateField from '$lib/components/form-fields/DateField.svelte';
@@ -52,7 +53,7 @@
           <span
             class="inline-flex items-center px-3 text-sm bg-muted border border-r-0 rounded-l-md whitespace-nowrap"
           >
-            /share/
+            {appPath('/share/')}
           </span>
           <Input
             bind:value={$formData.slug}

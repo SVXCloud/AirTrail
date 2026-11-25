@@ -1,3 +1,4 @@
+import { appPath } from '$lib/app-path';
 import { shareInputSchema } from '$lib/api/v1/schemas';
 import { parseJsonBody } from '$lib/server/api/v1/body';
 import { apiRoute } from '$lib/server/api/v1/route';
@@ -15,7 +16,7 @@ export const POST = apiRoute(
     const share = await createShare(principal, input);
     return apiV1Data(share, {
       status: 201,
-      headers: { Location: `/api/v1/shares/${share.id}` },
+      headers: { Location: appPath(`/api/v1/shares/${share.id}`) },
     });
   },
 );

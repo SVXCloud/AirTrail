@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import {
     Calendar as CalendarIcon,
     Check,
@@ -450,7 +451,7 @@
     />
   {:else if option.kind === 'airline' && option.iconPath}
     <img
-      src={`/api/uploads/${option.iconPath}`}
+      src={appPath(`/api/uploads/${option.iconPath}`)}
       alt=""
       class="size-[var(--mobile-filter-icon-size)] object-contain"
       style={`--mobile-filter-icon-size: ${size}px`}

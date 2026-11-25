@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { Plus } from '@o7/icon/lucide';
   import { toast } from 'svelte-sonner';
   import { defaults, type Infer, superForm } from 'sveltekit-superforms';
@@ -69,7 +70,7 @@
   onDiscard={() => form.reset()}
 >
   <ModalBreadcrumbHeader section="Airports" title="Add airport" icon={Plus} />
-  <form method="POST" action="/api/airport/save/form" use:enhance>
+  <form method="POST" action={appPath('/api/airport/save/form')} use:enhance>
     <ModalBody>
       <div class="grid gap-4">
         <AirportFormFields {form} />

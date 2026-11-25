@@ -3,6 +3,7 @@ import { sequence } from '@sveltejs/kit/hooks';
 import type { Cookie } from 'lucia';
 
 import '$lib/zod/setup';
+import { appRelativePath, cookiePath } from '$lib/app-path';
 import {
   corsPreflight,
   isCorsPath,
@@ -57,7 +58,7 @@ const demoHandle: Handle = async ({ event, resolve }) => {
 };
 
 const corsHandle: Handle = async ({ event, resolve }) => {
-  if (!isCorsPath(event.url.pathname)) return resolve(event);
+  if (!isCorsPath(appRelativePath(event.url.pathname))) return resolve(event);
   if (event.request.method === 'OPTIONS') return corsPreflight();
   return withCorsHeaders(await resolve(event));
 };
@@ -67,7 +68,7 @@ const csrfHandle: Handle = async ({ event, resolve }) => {
   if (
     isCrossSiteFormPost({
       method: request.method,
-      pathname: url.pathname,
+      pathname: appRelativePath(url.pathname),
       contentType: request.headers.get('content-type'),
       origin: request.headers.get('origin'),
       expectedOrigin: url.origin,
@@ -99,8 +100,8 @@ const authHandle: Handle = async ({ event, resolve }) => {
   }
   if (sessionCookie) {
     event.cookies.set(sessionCookie.name, sessionCookie.value, {
-      path: '.',
       ...sessionCookie.attributes,
+      path: cookiePath,
     });
   }
 

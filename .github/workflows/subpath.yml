@@ -1,0 +1,222 @@
+name: Subpath validation and stable releases
+
+on:
+  pull_request:
+    branches: [main, subpath]
+  push:
+    branches: [subpath]
+  schedule:
+    - cron: '37 5 * * *'
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the current subpath commit after all checks
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: airtrail-subpath-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'branch' }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      commit: ${{ steps.source.outputs.commit }}
+      version: ${{ steps.source.outputs.version }}
+      changed: ${{ steps.source.outputs.changed }}
+      validate: ${{ steps.source.outputs.validate }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+          ref: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'subpath' || github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Select and merge the latest stable release
+        id: source
+        shell: bash
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          mkdir -p report
+          base=$(git rev-parse HEAD)
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if [[ "$EVENT" == schedule ]]; then
+            bash scripts/subpath/sync-upstream.sh 2>&1 | tee report/upstream-sync.log
+          fi
+          commit=$(git rev-parse HEAD)
+          version=$(<.upstream-version)
+          [[ "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [[ "$commit" != "$base" ]]; then
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
+          fi
+          if [[ "$EVENT" != schedule || "$commit" != "$base" ]]; then
+            echo 'validate=true' >> "$GITHUB_OUTPUT"
+            git branch subpath-candidate "$commit"
+            git bundle create report/candidate.bundle refs/heads/subpath-candidate
+          fi
+          printf 'Source: %s\nCandidate: %s\nUpstream: %s\n' "$base" "$commit" "$version" | tee report/source.log
+      - name: Upload source and sync diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: source
+          path: report/
+          retention-days: 7
+
+  validate:
+    needs: prepare
+    if: needs.prepare.outputs.validate == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: source
+          path: source
+      - name: Check out the selected commit
+        env:
+          COMMIT: ${{ needs.prepare.outputs.commit }}
+        run: |
+          git clone --branch subpath-candidate source/candidate.bundle app
+          test "$(git -C app rev-parse HEAD)" = "$COMMIT"
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22
+      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2
+      - name: Run application unit tests
+        if: matrix.arch == 'amd64'
+        working-directory: app
+        run: |
+          set -o pipefail
+          node --test tests/subpath/base-path.test.js 2>&1 | tee ../base-path.log
+          bun install --frozen-lockfile
+          bun run check 2>&1 | tee ../typecheck.log
+          bun run test:unit 2>&1 | tee ../unit.log
+          bunx playwright install --with-deps chromium 2>&1 | tee ../browser-install.log
+      - name: Build and validate the image
+        working-directory: app
+        env:
+          ARCH: ${{ matrix.arch }}
+          SUBPATH_BROWSER_TEST: ${{ matrix.arch == 'amd64' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          docker build --platform "linux/$ARCH" --file docker/Dockerfile --tag "airtrail-ci:$ARCH" . 2>&1 | tee ../build.log
+          bash tests/subpath/docker.sh "airtrail-ci:$ARCH" 2>&1 | tee ../deployment.log
+      - name: Preserve the tested image for publication
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish)
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: docker save "airtrail-ci:$ARCH" | gzip -1 > "airtrail-$ARCH.tar.gz"
+      - name: Upload the validated image
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: airtrail-${{ matrix.arch }}
+          path: airtrail-${{ matrix.arch }}.tar.gz
+          if-no-files-found: error
+          retention-days: 2
+          compression-level: 0
+      - name: Upload validation logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: validation-${{ matrix.arch }}
+          path: |
+            base-path.log
+            typecheck.log
+            unit.log
+            build.log
+            deployment.log
+            browser-install.log
+          retention-days: 14
+
+  publish:
+    needs: [prepare, validate]
+    if: (github.event_name == 'schedule' && needs.prepare.outputs.changed == 'true') || (github.event_name == 'workflow_dispatch' && inputs.publish && github.ref_name == github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+          ref: subpath
+          token: ${{ secrets.UPSTREAM_SYNC_TOKEN || github.token }}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          path: artifacts
+      - name: Promote the exact tested commit
+        env:
+          COMMIT: ${{ needs.prepare.outputs.commit }}
+          CHANGED: ${{ needs.prepare.outputs.changed }}
+        run: |
+          git fetch artifacts/source/candidate.bundle refs/heads/subpath-candidate
+          test "$(git rev-parse FETCH_HEAD)" = "$COMMIT"
+          git merge-base --is-ancestor HEAD "$COMMIT"
+          if [[ "$CHANGED" == true ]]; then
+            git push origin "$COMMIT:refs/heads/subpath"
+          else
+            test "$(git rev-parse HEAD)" = "$COMMIT"
+          fi
+      - uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Publish the validated multi-architecture image
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          COMMIT: ${{ needs.prepare.outputs.commit }}
+        shell: bash
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          repositories=()
+          for arch in amd64 arm64; do
+            tag="$image:${VERSION}-subpath-${COMMIT:0:12}-$arch"
+            docker load -i "artifacts/airtrail-$arch/airtrail-$arch.tar.gz"
+            docker tag "airtrail-ci:$arch" "$tag"
+            output=$(docker push "$tag")
+            echo "$output"
+            digest=$(awk '/digest: sha256:/ { print $3 }' <<<"$output" | tail -1)
+            [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+            repositories+=("$image@$digest")
+          done
+          docker buildx imagetools create \
+            --tag "$image:$VERSION-subpath" --tag "$image:latest" "${repositories[@]}"
+          docker buildx imagetools inspect "$image:$VERSION-subpath" | tee -a "$GITHUB_STEP_SUMMARY"
+
+  report:
+    if: always()
+    needs: [prepare, validate, publish]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summarize upstream sync, verification, and publication
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          COMMIT: ${{ needs.prepare.outputs.commit }}
+          PREPARE: ${{ needs.prepare.result }}
+          VALIDATE: ${{ needs.validate.result }}
+          PUBLISH: ${{ needs.publish.result }}
+        run: |
+          {
+            echo '### AirTrail subpath maintenance'
+            printf -- '- Upstream: %s\n- Commit: %s\n' "${VERSION:-unknown}" "${COMMIT:-unknown}"
+            printf -- '- Source and merge: %s\n- Root and subpath verification: %s\n- GHCR publication: %s\n' "$PREPARE" "$VALIDATE" "$PUBLISH"
+            echo 'Download the source and validation artifacts for merge conflicts, build logs, test failures, and container logs.'
+          } >> "$GITHUB_STEP_SUMMARY"

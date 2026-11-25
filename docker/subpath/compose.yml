@@ -1,0 +1,36 @@
+# Use a copy of .env.example with BASE_PATH, ORIGIN, DB_URL, and DB_PASSWORD set.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE_NAME:-airtrail}
+      POSTGRES_USER: ${DB_USERNAME:-airtrail}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in the Compose .env file}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  airtrail:
+    image: ${AIRTRAIL_IMAGE:-ghcr.io/svxcloud/airtrail:latest}
+    restart: unless-stopped
+    environment:
+      BASE_PATH: ${BASE_PATH-/airtrail}
+      ORIGIN: ${ORIGIN:?Set ORIGIN to the public scheme and authority}
+      DB_URL: ${DB_URL:?Set DB_URL to the PostgreSQL URL}
+      UPLOAD_LOCATION: /app/uploads
+    ports:
+      - '127.0.0.1:3000:3000'
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
+  uploads:

@@ -1,3 +1,4 @@
+import { appPath } from '$lib/app-path';
 import {
   PROTECTED_RESOURCES,
   protectedResourceMetadataUrl,
@@ -17,14 +18,14 @@ export const createApiDiscovery = (instanceVersion: string) => ({
   api: {
     version: 'v1',
     minimumSupportedVersion: 'v1',
-    documentation: '/api/v1/openapi.yaml',
+    documentation: appPath('/api/v1/openapi.yaml'),
   },
   instance: { name: 'AirTrail', version: instanceVersion },
   authentication: AUTHENTICATION,
   mcp: {
     enabled: true,
     transport: 'streamable-http',
-    endpoint: PROTECTED_RESOURCES.mcp.path,
+    endpoint: appPath(PROTECTED_RESOURCES.mcp.path),
     oauth: true,
   },
   scopes: API_SCOPES.map((scope) => ({
@@ -46,6 +47,6 @@ export const createMcpDiscovery = (origin: string) => ({
     ...AUTHENTICATION,
     protectedResourceMetadata: protectedResourceMetadataUrl(origin, 'mcp'),
   },
-  apiDiscovery: `${origin}/api`,
+  apiDiscovery: `${origin}${appPath('/api')}`,
   documentation: MCP_DOCUMENTATION_URL,
 });

@@ -221,7 +221,7 @@ const server = createServer((request, response) => {
   });
 });
 
-server.listen(port, '127.0.0.1', () => {
+server.listen(port, process.env.E2E_OAUTH_HOST ?? '127.0.0.1', () => {
   console.log(`[fake-oidc] listening on ${issuer}`);
 });
 

@@ -1,3 +1,4 @@
+import { appPath } from '$lib/app-path';
 import { error, redirect } from '@sveltejs/kit';
 
 import type { PageServerLoad } from './$types';
@@ -9,7 +10,7 @@ import { listFlights } from '$lib/server/utils/flight';
 export const load: PageServerLoad = async ({ locals }) => {
   const user = locals.user;
   if (!user) {
-    return redirect(302, '/login');
+    return redirect(302, appPath('/login'));
   }
   if (
     !locals.authorization ||

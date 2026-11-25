@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { Check, ChevronDown } from '@o7/icon/lucide';
   import { onMount } from 'svelte';
 
@@ -72,7 +73,7 @@
       </p>
       {#each demo.accounts as account (account.key)}
         <a
-          href="/demo?as={account.key}"
+          href={appPath(`/demo?as=${account.key}`)}
           data-sveltekit-reload
           class={cn(
             'flex items-start gap-2 rounded-md px-2 py-1.5 hover:bg-accent',

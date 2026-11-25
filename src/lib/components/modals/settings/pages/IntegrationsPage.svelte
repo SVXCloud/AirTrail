@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { Info } from '@o7/icon/lucide';
   import { onMount } from 'svelte';
   import { toast } from 'svelte-sonner';
@@ -58,7 +59,7 @@
 
   onMount(async () => {
     try {
-      const res = await fetch('/api/integrations/config/get');
+      const res = await fetch(appPath('/api/integrations/config/get'));
       if (res.ok) {
         const data = await res.json();
         savedKey = data.aeroDataBoxKey ?? null;
@@ -95,7 +96,7 @@
 >
   <form
     method="POST"
-    action="/api/integrations/config/save"
+    action={appPath('/api/integrations/config/save')}
     autocomplete="off"
     class="space-y-4"
     use:enhance

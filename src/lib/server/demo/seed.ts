@@ -1,3 +1,4 @@
+import { appPath } from '$lib/app-path';
 import { randomUUID } from 'node:crypto';
 
 import { sql } from 'kysely';
@@ -461,7 +462,7 @@ export const seedDemo = async () => {
       id: randomUUID(),
       clientId,
       userId: ids.maya,
-      resource: `${env.ORIGIN ?? ''}/api/mcp`,
+      resource: `${env.ORIGIN ?? ''}${appPath('/api/mcp')}`,
       scopes: [
         'profile.read',
         'flight.read.own',

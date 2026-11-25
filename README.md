@@ -46,6 +46,56 @@
 - [Demo](https://demo.airtrail.johan.ohly.dk)
 - [Contributing](https://airtrail.johan.ohly.dk/docs/overview/contributing)
 
+## Deploying under a URL prefix
+
+The `subpath` branch follows the latest official stable release. One image
+supports both root and prefixed deployments. Leave `BASE_PATH` empty for
+`https://flights.example.com/`, or set it to `/airtrail` for
+`https://flights.example.com/airtrail/`. Multiple segments such as
+`/apps/airtrail` are supported. Keep `ORIGIN=https://flights.example.com` in
+both cases.
+
+1. Copy `.env.example` to a deployment directory as `.env`. Set `ORIGIN`,
+   `BASE_PATH`, `DB_PASSWORD`, and the matching password in `DB_URL`. If the
+   password contains URL punctuation, percent-encode it in `DB_URL`.
+2. Copy [the Compose example](docker/subpath/compose.yml) into that directory
+   as `compose.yml`, then run `docker compose up -d`. The example uses
+   `/airtrail` as its default. For root deployment set `BASE_PATH=` in `.env`.
+3. Forward the **unchanged** request path through
+   [Nginx](docker/subpath/nginx.conf), [Caddy](docker/subpath/Caddyfile), or
+   [Cloudflare Tunnel](docker/subpath/cloudflared.yml). Adjust the hostname and
+   every prefix in the example. If the proxy runs in Docker, replace the
+   loopback upstream with the AirTrail service address on its Docker network.
+   Preserve the two host-level OAuth discovery routes in the examples.
+
+Build the image locally until a version has passed CI and been published:
+
+```sh
+docker build -f docker/Dockerfile -t airtrail-subpath:local .
+AIRTRAIL_IMAGE=airtrail-subpath:local docker compose up -d
+```
+
+For a source checkout, export `BASE_PATH` before running Vite or building.
+Start a source-built production server with the same value and
+`node scripts/subpath/runtime.js`. The container sets its base at startup
+and needs writable temporary storage for its relocated build.
+
+To remount an existing installation, keep the existing PostgreSQL and uploads
+volumes and the same Compose project name. Back them up before upgrading.
+Changing the mount changes public URLs. Update existing share and calendar
+links, set the external OIDC redirect URI to
+`https://flights.example.com/airtrail/login`, and update API and MCP clients
+to use the new resource and issuer URLs. Sign in again if the browser's
+existing session cookie was scoped to the former mount.
+
+The [stable release workflow](.github/workflows/subpath.yml) checks for upstream
+stable releases daily, merges into a candidate, and runs unit tests plus root
+and nested deployments on Linux amd64 and arm64. It publishes the tested
+images to GHCR only after validation. The first publication can be requested
+from the repository's default branch using **Run workflow** with **publish**
+enabled. Merge conflicts and validation failures are recorded in the run
+summary and downloadable logs.
+
 ## 🤝 Contributing
 
 Want to contribute to AirTrail? Awesome! Check out the [contributing documentation](CONTRIBUTING.md) to get started.

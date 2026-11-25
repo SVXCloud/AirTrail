@@ -1,3 +1,4 @@
+import { cookiePath } from '$lib/app-path';
 import { error, json } from '@sveltejs/kit';
 import { generateId } from 'lucia';
 import type { UserInfoResponse } from 'openid-client';
@@ -49,8 +50,8 @@ export const POST: RequestHandler = async ({ cookies, request, locals }) => {
     return error(400, 'OAuth code verifier is missing');
   }
 
-  cookies.delete(OAUTH_STATE_COOKIE, { path: '/' });
-  cookies.delete(OAUTH_CODE_VERIFIER_COOKIE, { path: '/' });
+  cookies.delete(OAUTH_STATE_COOKIE, { path: cookiePath });
+  cookies.delete(OAUTH_CODE_VERIFIER_COOKIE, { path: cookiePath });
 
   const config = await appConfig.get();
   if (!config) {

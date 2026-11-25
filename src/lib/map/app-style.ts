@@ -1,3 +1,4 @@
+import { appPath } from '$lib/app-path';
 import {
   AIRPORT_STYLE_ROUTE_PATH,
   getAirportGatePillImageId,
@@ -30,7 +31,7 @@ export const getDefaultAppMapStyleUrl = (
     params.set('basemap', 'satellite');
   }
 
-  return `${AIRPORT_STYLE_ROUTE_PATH}?${params}`;
+  return `${appPath(AIRPORT_STYLE_ROUTE_PATH)}?${params}`;
 };
 
 export const getConfiguredAppMapStyleUrl = (
@@ -58,7 +59,7 @@ export const getConfiguredAppMapStyleUrl = (
 };
 
 export const isManagedAppMapStyleUrl = (styleUrl: string) =>
-  styleUrl.startsWith(`${AIRPORT_STYLE_ROUTE_PATH}?`);
+  styleUrl.startsWith(`${appPath(AIRPORT_STYLE_ROUTE_PATH)}?`);
 
 export const getAppMapImages = (
   base = '',

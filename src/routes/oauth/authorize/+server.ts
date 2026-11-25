@@ -1,3 +1,4 @@
+import { appPath, cookiePath } from '$lib/app-path';
 import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/db';
@@ -84,12 +85,15 @@ export const GET: RequestHandler = async (event) => {
     })
     .execute();
   cookies.set(OAUTH_REQUEST_COOKIE, requestId, {
-    path: '/',
+    path: cookiePath,
     httpOnly: true,
     sameSite: 'lax',
     secure: url.protocol === 'https:',
     maxAge: AUTHORIZATION_REQUEST_TTL_MS / 1000,
   });
-  if (!locals.user) throw redirect(303, '/login');
-  throw redirect(303, `/oauth/consent?id=${encodeURIComponent(requestId)}`);
+  if (!locals.user) throw redirect(303, appPath('/login'));
+  throw redirect(
+    303,
+    appPath(`/oauth/consent?id=${encodeURIComponent(requestId)}`),
+  );
 };

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { ShieldCheck } from '@o7/icon/lucide';
 
   import type { PageProps } from './$types';
@@ -23,8 +24,11 @@
     <div
       class="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-4 sm:px-8"
     >
-      <a href="/" class="flex items-center gap-2 text-foreground no-underline">
-        <img src="/favicon.svg" alt="AirTrail" class="size-8" />
+      <a
+        href={appPath('/')}
+        class="flex items-center gap-2 text-foreground no-underline"
+      >
+        <img src={appPath('/favicon.svg')} alt="AirTrail" class="size-8" />
         <span class="text-sm font-semibold tracking-tight">AirTrail</span>
       </a>
       <span class="h-6 w-px bg-border" aria-hidden="true"></span>
@@ -123,7 +127,9 @@
   <footer
     class="border-t bg-background px-4 py-4 text-center text-xs text-muted-foreground sm:px-8"
   >
-    <a href="/" class="transition-colors hover:text-foreground">AirTrail</a>
+    <a href={appPath('/')} class="transition-colors hover:text-foreground"
+      >AirTrail</a
+    >
     <span class="mx-2" aria-hidden="true">·</span>
     <a
       href={MCP_DOCUMENTATION_URL}

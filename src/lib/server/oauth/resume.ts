@@ -1,3 +1,4 @@
+import { appPath } from '$lib/app-path';
 import type { Cookies } from '@sveltejs/kit';
 
 export const OAUTH_REQUEST_COOKIE = 'airtrail_oauth_request';
@@ -8,5 +9,7 @@ export const OAUTH_REQUEST_COOKIE = 'airtrail_oauth_request';
  */
 export const postLoginTarget = (cookies: Cookies) => {
   const pending = cookies.get(OAUTH_REQUEST_COOKIE);
-  return pending ? `/oauth/consent?id=${encodeURIComponent(pending)}` : '/';
+  return pending
+    ? appPath(`/oauth/consent?id=${encodeURIComponent(pending)}`)
+    : appPath('/');
 };

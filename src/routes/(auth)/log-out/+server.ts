@@ -1,3 +1,4 @@
+import { appPath, cookiePath } from '$lib/app-path';
 import { error, redirect } from '@sveltejs/kit';
 
 import type { RequestHandler } from './$types';
@@ -13,9 +14,9 @@ export const POST: RequestHandler = async (event) => {
 
   const sessionCookie = lucia.createBlankSessionCookie();
   event.cookies.set(sessionCookie.name, sessionCookie.value, {
-    path: '.',
     ...sessionCookie.attributes,
+    path: cookiePath,
   });
 
-  redirect(302, '/login');
+  redirect(302, appPath('/login'));
 };

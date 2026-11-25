@@ -1,3 +1,4 @@
+import { appPath } from '$lib/app-path';
 import { generateId } from 'lucia';
 import { actionResult, setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -58,5 +59,5 @@ export const POST: RequestHandler = async ({ cookies, request }) => {
 
   await createSession(lucia, userId, cookies);
 
-  return actionResult('redirect', '/', 303);
+  return actionResult('redirect', appPath('/'), 303);
 };

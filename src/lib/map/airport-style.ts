@@ -1,3 +1,4 @@
+import { appPath } from '$lib/app-path';
 import { normalizeMapTheme, type MapProvider } from '$lib/map/basemap';
 
 export const AIRPORT_STYLE_ROUTE_PATH = '/api/map-styles/airport/style.json';
@@ -1200,7 +1201,7 @@ export const buildAirportStyle = (
     ...(rewrittenStyle.sources ?? {}),
     [AIRPORT_SOURCE]: {
       type: 'vector',
-      url: 'pmtiles:///airport-overlay.pmtiles',
+      url: `pmtiles://${appPath('/airport-overlay.pmtiles')}`,
       attribution: needsOpenStreetMapAttribution
         ? OPENSTREETMAP_ATTRIBUTION
         : '',

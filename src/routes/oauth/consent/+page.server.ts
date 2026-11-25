@@ -1,3 +1,4 @@
+import { appPath, cookiePath } from '$lib/app-path';
 import { error, redirect, type Cookies } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/db';
@@ -49,7 +50,7 @@ const loadBoundRequest = async (
 
 export const load: PageServerLoad = async ({ url, locals, cookies }) => {
   const id = url.searchParams.get('id');
-  if (!locals.user) throw redirect(303, '/login');
+  if (!locals.user) throw redirect(303, appPath('/login'));
   if (!locals.authorization) throw error(401, 'Login is required');
   const request = await loadBoundRequest(id, locals.user.id, cookies);
   const resource = new URL(request.resource);
@@ -92,7 +93,7 @@ export const actions: Actions = {
       .deleteFrom('oauthAuthorizationRequest')
       .where('id', '=', id)
       .execute();
-    cookies.delete(OAUTH_REQUEST_COOKIE, { path: '/' });
+    cookies.delete(OAUTH_REQUEST_COOKIE, { path: cookiePath });
 
     const deny = (code: string, description: string) =>
       redirect(

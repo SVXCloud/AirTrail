@@ -1,3 +1,4 @@
+import { cookiePath } from '$lib/app-path';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
@@ -62,7 +63,7 @@ export const oauthRouter = router({
       const cookieOptions = {
         httpOnly: true,
         maxAge: 10 * 60,
-        path: '/',
+        path: cookiePath,
         sameSite: 'lax' as const,
         secure,
       };

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { invalidateAll } from '$app/navigation';
   import { toast } from 'svelte-sonner';
   import { defaults, type Infer, superForm } from 'sveltekit-superforms';
@@ -122,7 +123,7 @@
 
 <form
   method="POST"
-  action="/api/map/config/save"
+  action={appPath('/api/map/config/save')}
   autocomplete="off"
   class="space-y-5"
   use:enhance

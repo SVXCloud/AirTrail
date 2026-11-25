@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { ChevronDown } from '@o7/icon/lucide';
   import { onMount } from 'svelte';
   import { toast } from 'svelte-sonner';
@@ -21,7 +22,7 @@
   onMount(async () => {
     if (isSetup) {
       toast.info('AirTrail is already setup');
-      await goto('/');
+      await goto(appPath('/'));
     }
   });
 
@@ -76,7 +77,7 @@
       </div>
       <form
         method="POST"
-        action="/api/users/setup"
+        action={appPath('/api/users/setup')}
         use:enhance
         class="grid gap-4"
       >

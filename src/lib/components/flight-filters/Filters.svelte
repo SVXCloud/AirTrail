@@ -1,4 +1,5 @@
 <script lang="ts" module>
+  import { appPath } from '$lib/app-path';
   import { browser } from '$app/environment';
 
   const filterContentZIndexProperty = '--airtrail-filter-content-z-index';
@@ -144,7 +145,7 @@
   function airlineIcon(airline: Airline): FilterIcon {
     if (!airline.iconPath) return Airlines;
 
-    const src = escapeAttribute(`/api/uploads/${airline.iconPath}`);
+    const src = escapeAttribute(appPath(`/api/uploads/${airline.iconPath}`));
     const title = escapeAttribute(airline.name);
 
     return createRawSnippet(() => ({

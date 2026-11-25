@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { KeyRound } from '@o7/icon/lucide';
   import { toast } from 'svelte-sonner';
   import { defaults, type Infer, superForm } from 'sveltekit-superforms';
@@ -55,7 +56,7 @@
     <form
       class="flex flex-col gap-2"
       method="POST"
-      action="/api/users/set-password"
+      action={appPath('/api/users/set-password')}
       use:enhance
     >
       <div class="flex justify-between gap-2">

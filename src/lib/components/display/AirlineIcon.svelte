@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { Plane } from '@o7/icon/lucide';
   import { Airlines } from '@o7/icon/material/solid';
 
@@ -23,7 +24,7 @@
 
   const iconPath = $derived(airline?.iconPath ?? null);
   const hasIcon = $derived(!!iconPath);
-  const iconSrc = $derived(iconPath ? `/api/uploads/${iconPath}` : '');
+  const iconSrc = $derived(iconPath ? appPath(`/api/uploads/${iconPath}`) : '');
 
   $effect(() => {
     iconPath;

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { KeyRound } from '@o7/icon/lucide';
   import { toast } from 'svelte-sonner';
   import { defaults, type Infer, superForm } from 'sveltekit-superforms';
@@ -25,7 +26,7 @@
         if (form.message) {
           if (form.message.type === 'success') {
             toast.success(form.message.text);
-            postViaForm('/log-out', {});
+            postViaForm(appPath('/log-out'), {});
             return;
           }
           toast.error(form.message.text);
@@ -54,7 +55,7 @@
     <form
       class="flex flex-col gap-2"
       method="POST"
-      action="/api/users/edit-password"
+      action={appPath('/api/users/edit-password')}
       use:enhance
     >
       <Form.Field {form} name="currentPassword">

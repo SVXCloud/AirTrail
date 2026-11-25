@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { LoaderCircle } from '@o7/icon/lucide';
   import { toast } from 'svelte-sonner';
 
@@ -15,7 +16,7 @@
   let loading = $state(false);
   const link = async () => {
     loading = true;
-    const redirect = window.location.origin + '/login';
+    const redirect = window.location.origin + appPath('/login');
     if (!redirect) return;
 
     try {

@@ -1,9 +1,10 @@
+import { base } from '$app/paths';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { API_SCOPES } from '$lib/api/v1/scopes';
 
 export const GET: RequestHandler = ({ url }) => {
-  const issuer = url.origin;
+  const issuer = url.origin + base;
   return json(
     {
       issuer,

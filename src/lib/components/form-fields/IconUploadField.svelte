@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { ImageUp, LoaderCircle, Trash2 } from '@o7/icon/lucide';
   import { toast } from 'svelte-sonner';
 
@@ -49,7 +50,7 @@
     pendingMode
       ? pendingPreviewUrl
       : currentIconPath
-        ? `/api/uploads/${currentIconPath}?v=${cacheKey}`
+        ? appPath(`/api/uploads/${currentIconPath}?v=${cacheKey}`)
         : null,
   );
 
@@ -84,7 +85,7 @@
     formData.append('airlineId', airlineId.toString());
 
     try {
-      const response = await fetch('/api/airline/icon', {
+      const response = await fetch(appPath('/api/airline/icon'), {
         method: 'POST',
         body: formData,
       });
@@ -142,7 +143,7 @@
 
     removing = true;
     try {
-      const response = await fetch('/api/airline/icon', {
+      const response = await fetch(appPath('/api/airline/icon'), {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ airlineId }),

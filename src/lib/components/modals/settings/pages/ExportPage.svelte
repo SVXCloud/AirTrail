@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { FileSpreadsheet, FileBraces, RefreshCw } from '@o7/icon/lucide';
   import { formatDistanceToNow } from 'date-fns';
   import { toast } from 'svelte-sonner';
@@ -82,11 +83,13 @@
   });
 
   const feedUrl = $derived(
-    feed ? `${window.location.origin}/api/calendar/${feed.token}.ics` : '',
+    feed
+      ? `${window.location.origin}${appPath(`/api/calendar/${feed.token}.ics`)}`
+      : '',
   );
   const subscribeUrl = $derived(
     feed
-      ? `webcal://${window.location.host}/api/calendar/${feed.token}.ics`
+      ? `webcal://${window.location.host}${appPath(`/api/calendar/${feed.token}.ics`)}`
       : '',
   );
 

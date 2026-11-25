@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { Globe } from '@o7/icon';
   import { toast } from 'svelte-sonner';
   import { defaults, type Infer, superForm } from 'sveltekit-superforms';
@@ -116,7 +117,7 @@
   class="max-w-screen-lg"
 >
   <ModalBreadcrumbHeader section="Flights" title="New flight" icon={Globe} />
-  <form method="POST" action="/api/flight/save/form" use:enhance>
+  <form method="POST" action={appPath('/api/flight/save/form')} use:enhance>
     <FlightForm
       bind:this={flightForm}
       {form}

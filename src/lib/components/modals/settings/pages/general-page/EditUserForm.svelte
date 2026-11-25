@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { toast } from 'svelte-sonner';
   import { defaults, type Infer, superForm } from 'sveltekit-superforms';
   import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -29,7 +30,7 @@
 
 <form
   method="POST"
-  action="/api/users/edit"
+  action={appPath('/api/users/edit')}
   use:enhance
   class="flex flex-col gap-2"
 >

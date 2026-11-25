@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { User } from '@o7/icon/lucide';
   import { toast } from 'svelte-sonner';
   import { defaults, type Infer, superForm } from 'sveltekit-superforms';
@@ -117,7 +118,9 @@
     <form
       class="flex flex-col gap-2"
       method="POST"
-      action={isEdit ? '/api/users/admin-edit' : '/api/users/add'}
+      action={isEdit
+        ? appPath('/api/users/admin-edit')
+        : appPath('/api/users/add')}
       use:enhance
     >
       <Form.Field {form} name="username">

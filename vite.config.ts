@@ -2,13 +2,20 @@ import { o7Icon } from '@o7/icon/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
+import {
+  buildBasePath,
+  rewriteDiscoveryUrl,
+} from './scripts/subpath/base-path.js';
 import { VitePWA, type VitePWAOptions } from 'vite-plugin-pwa';
+
+const base = buildBasePath();
+const scope = `${base}/`;
 
 const pwaOptions = {
   // SvelteKit builds client asset URLs relatively. Keep the service worker at
   // the application root so registration also works from nested routes.
-  base: '/',
-  scope: '/',
+  base: scope,
+  scope,
   // SvelteKit doesn't run vite-plugin-pwa's HTML injection, so the service
   // worker is registered manually in src/routes/+layout.svelte.
   injectRegister: null,
@@ -126,45 +133,45 @@ const pwaOptions = {
     'countries-bounds.json',
   ],
   manifest: {
-    id: '/',
+    id: scope,
     name: 'AirTrail',
     short_name: 'AirTrail',
     description: 'A modern, open-source personal flight tracking system',
     lang: 'en',
     categories: ['travel', 'navigation', 'utilities'],
-    start_url: '/',
-    scope: '/',
+    start_url: scope,
+    scope,
     display: 'standalone',
     orientation: 'any',
     background_color: '#000000',
     theme_color: '#3c83f6',
     icons: [
       {
-        src: '/favicon.svg',
+        src: `${scope}favicon.svg`,
         sizes: 'any',
         type: 'image/svg+xml',
         purpose: 'any',
       },
       {
-        src: '/favicon.png',
+        src: `${scope}favicon.png`,
         sizes: '96x96',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/icon-192.png',
+        src: `${scope}icon-192.png`,
         sizes: '192x192',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/icon-512.png',
+        src: `${scope}icon-512.png`,
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/icon-512-maskable.png',
+        src: `${scope}icon-512-maskable.png`,
         sizes: '512x512',
         type: 'image/png',
         purpose: 'maskable',
@@ -183,5 +190,19 @@ export default defineConfig({
   resolve: {
     dedupe: ['@internationalized/date', 'maplibre-gl'],
   },
-  plugins: [o7Icon(), tailwindcss(), sveltekit(), VitePWA(pwaOptions)],
+  plugins: [
+    {
+      name: 'airtrail-oauth-discovery',
+      configureServer(server) {
+        server.middlewares.use((req, _res, next) => {
+          rewriteDiscoveryUrl(req, base);
+          next();
+        });
+      },
+    },
+    o7Icon(),
+    tailwindcss(),
+    sveltekit(),
+    VitePWA(pwaOptions),
+  ],
 });

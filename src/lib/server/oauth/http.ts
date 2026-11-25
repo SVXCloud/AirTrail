@@ -1,3 +1,4 @@
+import { base } from '$app/paths';
 import { json, type RequestEvent } from '@sveltejs/kit';
 
 import { API_SCOPES } from '$lib/api/v1/scopes';
@@ -113,7 +114,7 @@ export const protectedResourceMetadata = (
   json(
     {
       resource: protectedResourceUrl(origin, resource),
-      authorization_servers: [origin],
+      authorization_servers: [origin + base],
       bearer_methods_supported: ['header'],
       scopes_supported: API_SCOPES,
     },

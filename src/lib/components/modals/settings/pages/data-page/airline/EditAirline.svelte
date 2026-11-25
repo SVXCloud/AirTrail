@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { toast } from 'svelte-sonner';
   import { defaults, type Infer, superForm } from 'sveltekit-superforms';
   import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -91,7 +92,7 @@
   <ModalBody>
     <form
       method="POST"
-      action="/api/airline/save/form"
+      action={appPath('/api/airline/save/form')}
       use:enhance
       class="grid gap-4"
     >

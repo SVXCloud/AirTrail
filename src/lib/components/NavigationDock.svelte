@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import {
     ChartColumn,
     GitBranchPlus,
@@ -63,10 +64,13 @@
       canDeduplicateOwnFlights(page.data.authorization) ||
       hasClientPermission(page.data.authorization, 'tools.sql.execute')
     ) {
-      items.push({ label: 'Tools', href: '/tools' });
+      items.push({ label: 'Tools', href: appPath('/tools') });
     }
     if (hasClientPermission(page.data.authorization, 'flight.read.own')) {
-      items.push({ label: 'Visited countries', href: '/visited-countries' });
+      items.push({
+        label: 'Visited countries',
+        href: appPath('/visited-countries'),
+      });
     }
     return items;
   });
@@ -77,9 +81,9 @@
   class="z-10 absolute bottom-6 left-1/2 translate-x-[-50%]"
 >
   <div class="flex gap-4">
-    {#if page.url.pathname !== '/'}
+    {#if page.route.id !== '/'}
       <div transition:flyAndScale>
-        <DockFloatingItem href="/" label="Home">
+        <DockFloatingItem href={appPath('/')} label="Home">
           <Map />
         </DockFloatingItem>
       </div>
@@ -88,7 +92,7 @@
       {#if hasClientPermission(page.data.authorization, 'flight.create.own')}
         <DockTooltipItem item={addFlightItem} />
       {/if}
-      {#if page.url.pathname === '/' && hasClientPermission(page.data.authorization, 'flight.read.own')}
+      {#if page.route.id === '/' && hasClientPermission(page.data.authorization, 'flight.read.own')}
         <DockTooltipItem item={listFlightsItem} />
         <DockTooltipItem item={flightsStatisticsItem} />
       {/if}

@@ -1,3 +1,4 @@
+import { cookiePath } from '$lib/app-path';
 import type { Cookies } from '@sveltejs/kit';
 import { sql } from 'kysely';
 import type { Lucia } from 'lucia';
@@ -101,8 +102,8 @@ export const createSession = async (
   const sessionCookie = await createSessionCookie(lucia, userId);
 
   cookies.set(sessionCookie.name, sessionCookie.value, {
-    path: '.',
     ...sessionCookie.attributes,
+    path: cookiePath,
   });
 };
 
@@ -110,8 +111,8 @@ export const deleteSession = async (lucia: Lucia, cookies: Cookies) => {
   const sessionCookie = lucia.createBlankSessionCookie();
 
   cookies.set(sessionCookie.name, sessionCookie.value, {
-    path: '.',
     ...sessionCookie.attributes,
+    path: cookiePath,
   });
 };
 

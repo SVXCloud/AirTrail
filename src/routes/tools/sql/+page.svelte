@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
   import { hasClientPermission } from '$lib/authorization/permissions';
@@ -9,7 +10,7 @@
 
   $effect(() => {
     if (!hasClientPermission(page.data.authorization, 'tools.sql.execute')) {
-      goto('/');
+      goto(appPath('/'));
     }
   });
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { browser } from '$app/environment';
   import { base } from '$app/paths';
   import { RefreshCw } from '@o7/icon/lucide';
@@ -143,7 +144,7 @@
     if (!map || !codes.length) return;
 
     if (!countryBounds) {
-      const response = await fetch('/countries-bounds.json');
+      const response = await fetch(appPath('/countries-bounds.json'));
       countryBounds = (await response.json()) as CountryBounds;
     }
 
@@ -207,7 +208,10 @@
   <NavigationControl />
   <GeolocateControl />
 
-  <VectorTileSource id="countries" url="pmtiles:///countries.pmtiles">
+  <VectorTileSource
+    id="countries"
+    url={`pmtiles://${appPath('/countries.pmtiles')}`}
+  >
     <FillLayer
       id="countries"
       sourceLayer="countries"

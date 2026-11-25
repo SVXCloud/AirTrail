@@ -1,0 +1,6 @@
+flights.example.com {
+    @airtrail path /airtrail /airtrail/* /.well-known/oauth-authorization-server/airtrail /.well-known/oauth-protected-resource/airtrail/api/v1 /.well-known/oauth-protected-resource/airtrail/api/mcp
+    handle @airtrail {
+        reverse_proxy 127.0.0.1:3000
+    }
+}

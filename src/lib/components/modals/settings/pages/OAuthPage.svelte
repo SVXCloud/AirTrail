@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appPath } from '$lib/app-path';
   import { ChevronRight, Info, TriangleAlert } from '@o7/icon/lucide';
   import { Collapsible } from 'bits-ui';
   import { onDestroy, tick } from 'svelte';
@@ -153,7 +154,7 @@
     <Tabs.Content value="connection" class="mt-0">
       <form
         method="POST"
-        action="/api/oauth/save"
+        action={appPath('/api/oauth/save')}
         autocomplete="off"
         class="space-y-4"
         use:enhance

@@ -1,3 +1,4 @@
+import { appPath } from '$lib/app-path';
 import { flightInputSchema } from '$lib/api/v1/schemas';
 import { parseJsonBody } from '$lib/server/api/v1/body';
 import { parseFlightScope, parsePage } from '$lib/server/api/v1/query';
@@ -27,7 +28,7 @@ export const POST = apiRoute(
     const id = await createFlight(principal, input);
     return apiV1Data(
       { id },
-      { status: 201, headers: { Location: `/api/v1/flights/${id}` } },
+      { status: 201, headers: { Location: appPath(`/api/v1/flights/${id}`) } },
     );
   },
 );
