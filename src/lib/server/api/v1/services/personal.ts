@@ -56,9 +56,11 @@ export const updateShare = async (
   id: number,
   input: ShareInput,
 ) => {
-  const row = await patchShare(principal.user.id, id, shareValues(input)).catch(
-    slugConflict,
-  );
+  const values = shareValues(input);
+  const row = await patchShare(principal.user.id, id, {
+    ...values,
+    slug: values.slug ?? undefined,
+  }).catch(slugConflict);
   if (!row) throw new ApiOperationError('not_found', 'Share not found');
   return toShareDto(row);
 };

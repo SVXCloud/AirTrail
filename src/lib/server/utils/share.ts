@@ -131,7 +131,7 @@ const assertSlugAvailable = async (slug: string, exceptId?: number) => {
 };
 
 /** Tracks are drawn on the map, so they cannot be shown without it. */
-const withTrackInvariant = <T extends Partial<ShareValues>>(
+const withTrackInvariant = <T extends Pick<ShareValues, 'showTracks'>>(
   values: T,
   showMap: boolean | undefined,
 ): T => (showMap === false ? { ...values, showTracks: false } : values);

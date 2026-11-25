@@ -112,33 +112,31 @@ describe('guarded endpoints', () => {
     [
       'token',
       RATE_LIMITS.oauthToken,
-      () => import('../../../routes/oauth/token/+server'),
+      async () => (await import('../../../routes/oauth/token/+server')).POST,
       'POST',
     ],
     [
       'revoke',
       RATE_LIMITS.oauthRevoke,
-      () => import('../../../routes/oauth/revoke/+server'),
+      async () => (await import('../../../routes/oauth/revoke/+server')).POST,
       'POST',
     ],
     [
       'register',
       RATE_LIMITS.oauthRegister,
-      () => import('../../../routes/oauth/register/+server'),
+      async () => (await import('../../../routes/oauth/register/+server')).POST,
       'POST',
     ],
     [
       'authorize',
       RATE_LIMITS.oauthAuthorize,
-      () => import('../../../routes/oauth/authorize/+server'),
+      async () => (await import('../../../routes/oauth/authorize/+server')).GET,
       'GET',
     ],
   ] as const)('/oauth/%s answers 429', async (name, limit, load, method) => {
     const address = `198.51.100.${name.length}`;
     exhaust(address, limit);
-    const handler = (await load())[method] as (
-      event: unknown,
-    ) => Promise<Response>;
+    const handler = (await load()) as (event: unknown) => Promise<Response>;
     const url = `https://airtrail.example/oauth/${name}`;
     const response = await handler(
       event(address, method === 'GET' ? new Request(url) : form(url)),

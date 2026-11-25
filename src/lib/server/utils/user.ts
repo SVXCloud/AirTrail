@@ -2,7 +2,8 @@ import type { Kysely } from 'kysely';
 import type { z } from 'zod';
 
 import type { DB } from '$lib/db/schema';
-import type { PageUser, PublicUser, User } from '$lib/db/types';
+import type { User } from 'lucia';
+import type { PageUser, PublicUser } from '$lib/db/types';
 import type { AuthorizationContext } from '$lib/server/authorization/context';
 import { db } from '$lib/db';
 import type { updatePreferencesSchema } from '$lib/zod/user';

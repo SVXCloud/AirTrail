@@ -76,6 +76,8 @@ export const processScreenshots = async () => {
 
   for (const file of raws) {
     const [name, theme] = file.replace(/\.png$/, '').split('.');
+    if (!name || !theme)
+      throw new Error(`Invalid screenshot filename: ${file}`);
     const target =
       SPECIAL[name]?.(theme) ?? join(DOCS_SCREENSHOTS, `${name}.${theme}.webp`);
     const image = await encode(join(RAW_DIR, file), target);

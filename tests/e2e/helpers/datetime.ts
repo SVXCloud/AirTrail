@@ -7,6 +7,7 @@ import type { Locator } from '@playwright/test';
  */
 export const fillDateField = async (scope: Locator, dateIso: string) => {
   const [year, month, day] = dateIso.split('-');
+  if (!year || !month || !day) throw new Error(`Invalid date: ${dateIso}`);
   await typeSegment(scope.locator('[data-segment="day"]'), day);
   await typeSegment(scope.locator('[data-segment="month"]'), month);
   await typeSegment(scope.locator('[data-segment="year"]'), year);
@@ -18,8 +19,9 @@ export const fillDateField = async (scope: Locator, dateIso: string) => {
  *   12h: '10:30 pm'  (case-insensitive)
  */
 export const fillTimeField = async (scope: Locator, text: string) => {
-  const period = text.match(/(am|pm)\s*$/i)?.[1].toLowerCase();
+  const period = text.match(/(am|pm)\s*$/i)?.[1]?.toLowerCase();
   const [h, m] = text.replace(/\s*(am|pm)\s*$/i, '').split(':');
+  if (!h || !m) throw new Error(`Invalid time: ${text}`);
   await typeSegment(scope.locator('[data-segment="hour"]'), h.padStart(2, '0'));
   await typeSegment(
     scope.locator('[data-segment="minute"]'),
