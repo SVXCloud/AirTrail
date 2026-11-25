@@ -91,9 +91,10 @@ existing session cookie was scoped to the former mount.
 The [stable release workflow](.github/workflows/subpath.yml) checks for upstream
 stable releases daily, merges into a candidate, and runs unit tests plus root
 and nested deployments on Linux amd64 and arm64. It publishes the tested
-images to GHCR only after validation. Set `subpath` as the repository default branch to activate the schedule.
-To publish the first image after review, choose **Run workflow** with
-**publish** enabled on that branch. Merge conflicts and validation failures are recorded in the run
+images to GHCR only after validation. Pushes to the maintained `subpath`
+branch use the same release gate. Set `subpath` as the repository default
+branch to activate the schedule. For a manual rebuild, choose
+**Run workflow** with **publish** enabled on the default branch. Merge conflicts and validation failures are recorded in the run
 summary and downloadable logs.
 
 ## 🤝 Contributing

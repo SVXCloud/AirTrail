@@ -29,6 +29,7 @@ jobs:
       version: ${{ steps.source.outputs.version }}
       changed: ${{ steps.source.outputs.changed }}
       validate: ${{ steps.source.outputs.validate }}
+      publish: ${{ steps.source.outputs.publish }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -40,6 +41,8 @@ jobs:
         shell: bash
         env:
           EVENT: ${{ github.event_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          REQUEST_PUBLISH: ${{ inputs.publish }}
         run: |
           mkdir -p report
           base=$(git rev-parse HEAD)
@@ -55,6 +58,11 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           if [[ "$commit" != "$base" ]]; then
             echo 'changed=true' >> "$GITHUB_OUTPUT"
+          fi
+          if [[ "$EVENT" == push && "$GITHUB_REF_NAME" == subpath ]] ||
+             [[ "$EVENT" == schedule && "$commit" != "$base" ]] ||
+             [[ "$EVENT" == workflow_dispatch && "$REQUEST_PUBLISH" == true && "$GITHUB_REF_NAME" == "$DEFAULT_BRANCH" ]]; then
+            echo 'publish=true' >> "$GITHUB_OUTPUT"
           fi
           if [[ "$EVENT" != schedule || "$commit" != "$base" ]]; then
             echo 'validate=true' >> "$GITHUB_OUTPUT"
@@ -104,7 +112,7 @@ jobs:
         run: |
           set -o pipefail
           node --test tests/subpath/base-path.test.js 2>&1 | tee ../base-path.log
-          bun install --frozen-lockfile
+          bun install --frozen-lockfile 2>&1 | tee ../install.log
           bun run check 2>&1 | tee ../typecheck.log
           bun run test:unit --testTimeout 15000 2>&1 | tee ../unit.log
           bunx playwright install --with-deps chromium 2>&1 | tee ../browser-install.log
@@ -118,12 +126,12 @@ jobs:
           docker build --platform "linux/$ARCH" --file docker/Dockerfile --tag "airtrail-ci:$ARCH" . 2>&1 | tee ../build.log
           bash tests/subpath/docker.sh "airtrail-ci:$ARCH" 2>&1 | tee ../deployment.log
       - name: Preserve the tested image for publication
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish)
+        if: needs.prepare.outputs.publish == 'true'
         env:
           ARCH: ${{ matrix.arch }}
         run: docker save "airtrail-ci:$ARCH" | gzip -1 > "airtrail-$ARCH.tar.gz"
       - name: Upload the validated image
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish)
+        if: needs.prepare.outputs.publish == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: airtrail-${{ matrix.arch }}
@@ -138,6 +146,7 @@ jobs:
           name: validation-${{ matrix.arch }}
           path: |
             base-path.log
+            install.log
             typecheck.log
             unit.log
             build.log
@@ -147,7 +156,7 @@ jobs:
 
   publish:
     needs: [prepare, validate]
-    if: (github.event_name == 'schedule' && needs.prepare.outputs.changed == 'true') || (github.event_name == 'workflow_dispatch' && inputs.publish && github.ref_name == github.event.repository.default_branch)
+    if: needs.prepare.outputs.publish == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
