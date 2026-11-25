@@ -5,6 +5,7 @@ import { normalizeBasePath } from '../../scripts/subpath/base-path.js';
 
 const origin = process.env.TEST_ORIGIN ?? 'http://localhost:3000';
 const base = normalizeBasePath(process.env.BASE_PATH);
+const protocol = new URL(origin).protocol;
 
 test(
   'browser loads mounted JavaScript, submits the form, and registers a scoped worker',
@@ -19,7 +20,11 @@ test(
       const failures = [];
       page.on('response', (response) => {
         const url = new URL(response.url());
-        if (url.origin === origin && !url.pathname.startsWith(base + '/'))
+        if (
+          url.protocol === protocol &&
+          url.origin === origin &&
+          !url.pathname.startsWith(base + '/')
+        )
           failures.push(url.pathname);
       });
 

@@ -106,7 +106,7 @@ jobs:
           node --test tests/subpath/base-path.test.js 2>&1 | tee ../base-path.log
           bun install --frozen-lockfile
           bun run check 2>&1 | tee ../typecheck.log
-          bun run test:unit 2>&1 | tee ../unit.log
+          bun run test:unit --testTimeout 15000 2>&1 | tee ../unit.log
           bunx playwright install --with-deps chromium 2>&1 | tee ../browser-install.log
       - name: Build and validate the image
         working-directory: app

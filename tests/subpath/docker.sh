@@ -37,7 +37,9 @@ docker exec -i "$db" psql -v ON_ERROR_STOP=1 -v "oidc_issuer=http://$oidc:3001/.
 
 # Reuse the database when remounting. The second smoke test must log in with
 # the account created at root rather than running first-user setup again.
+failed=0
 for base in '' /apps/airtrail; do
+  printf '\nValidating BASE_PATH=%s\n' "${base:-<root>}"
   docker run -d --name "$app" --network "$network" -p 127.0.0.1:3000:3000 \
     -e ORIGIN=http://localhost:3000 -e DB_URL="$db_url" -e BASE_PATH="$base" \
     -e UPLOAD_LOCATION=/app/uploads -e OAUTH_ALLOW_INSECURE_HTTP=true "$image"
@@ -49,9 +51,10 @@ for base in '' /apps/airtrail; do
   docker exec "$app" airtrail-healthcheck
   empty_db=0
   if [[ -z "$base" ]]; then empty_db=1; fi
-  BASE_PATH="$base" EXPECT_EMPTY_DB="$empty_db" OIDC_TEST_ORIGIN=http://localhost:3001 node --test tests/subpath/smoke.js
+  BASE_PATH="$base" EXPECT_EMPTY_DB="$empty_db" OIDC_TEST_ORIGIN=http://localhost:3001 node --test tests/subpath/smoke.js || failed=1
   if [[ "${SUBPATH_BROWSER_TEST:-0}" == 1 ]]; then
-    BASE_PATH="$base" node --test tests/subpath/browser.js
+    BASE_PATH="$base" node --test tests/subpath/browser.js || failed=1
   fi
   docker rm -f -v "$app" >/dev/null
 done
+exit "$failed"
