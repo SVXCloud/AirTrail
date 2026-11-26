@@ -197,7 +197,7 @@ jobs:
           image="ghcr.io/${GITHUB_REPOSITORY,,}"
           repositories=()
           for arch in amd64 arm64; do
-            tag="$image:${VERSION}-subpath-${COMMIT:0:12}-$arch"
+            tag="$image:${VERSION}-air-${COMMIT:0:12}-$arch"
             docker load -i "artifacts/airtrail-$arch/airtrail-$arch.tar.gz"
             docker tag "airtrail-ci:$arch" "$tag"
             output=$(docker push "$tag")
@@ -207,8 +207,8 @@ jobs:
             repositories+=("$image@$digest")
           done
           docker buildx imagetools create \
-            --tag "$image:$VERSION-subpath" --tag "$image:latest" "${repositories[@]}"
-          docker buildx imagetools inspect "$image:$VERSION-subpath" | tee -a "$GITHUB_STEP_SUMMARY"
+            --tag "$image:$VERSION-air" --tag "$image:latest" "${repositories[@]}"
+          docker buildx imagetools inspect "$image:$VERSION-air" | tee -a "$GITHUB_STEP_SUMMARY"
 
   report:
     if: always()
@@ -226,6 +226,6 @@ jobs:
           {
             echo '### AirTrail subpath maintenance'
             printf -- '- Upstream: %s\n- Commit: %s\n' "${VERSION:-unknown}" "${COMMIT:-unknown}"
-            printf -- '- Source and merge: %s\n- Root and subpath verification: %s\n- GHCR publication: %s\n' "$PREPARE" "$VALIDATE" "$PUBLISH"
+            printf -- '- Source and merge: %s\n- /air deployment verification: %s\n- GHCR publication: %s\n' "$PREPARE" "$VALIDATE" "$PUBLISH"
             echo 'Download the source and validation artifacts for merge conflicts, build logs, test failures, and container logs.'
           } >> "$GITHUB_STEP_SUMMARY"

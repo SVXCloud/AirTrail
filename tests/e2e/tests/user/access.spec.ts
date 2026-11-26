@@ -5,7 +5,7 @@ import { expect, test } from '@test/index';
 
 test.describe('Authentication', () => {
   test('no unauthorized access', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('./');
     await page.waitForURL(isPathname('/login'));
   });
 
@@ -23,7 +23,7 @@ test.describe('Authentication', () => {
     const { user } = await usersFactory.create();
 
     await login(page, user);
-    await page.goto('/');
+    await page.goto('./');
 
     await page.waitForURL(isPathname('/'));
 

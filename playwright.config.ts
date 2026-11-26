@@ -1,3 +1,4 @@
+import { basePath } from './scripts/subpath/base-path.js';
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 
@@ -12,7 +13,7 @@ export default defineConfig({
     ? [['list'], ['github'], ['html']]
     : [['list'], ['html']],
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: `http://localhost:3000${basePath}/`,
     trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
     video: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
     screenshot: 'only-on-failure',

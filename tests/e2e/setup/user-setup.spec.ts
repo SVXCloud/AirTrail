@@ -15,7 +15,7 @@ test.describe('Setup', async () => {
       displayName: 'Setup Test User',
     };
 
-    await page.goto('/');
+    await page.goto('./');
     await page.waitForURL(/\/setup/);
 
     await page.fill('input[name="username"]', testUser.username);
@@ -34,7 +34,7 @@ test.describe('Setup', async () => {
   test('cannot complete set up if user already exists', async ({ page }) => {
     await usersFactory.create();
 
-    await page.goto('/setup');
+    await page.goto('./setup');
     await page.waitForURL(isPathname('/login'));
   });
 });

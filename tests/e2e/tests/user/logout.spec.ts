@@ -8,14 +8,14 @@ test.describe('Logout', () => {
 
     await login(page, user);
 
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL('./');
 
     await page.locator('id=settings-button').click();
     await page.getByRole('button', { name: 'Log out' }).click();
 
     await page.waitForURL(/\/login(\?|$)/u);
 
-    await page.goto('/');
+    await page.goto('./');
     await page.waitForURL(/\/login(\?|$)/u);
   });
 });

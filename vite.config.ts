@@ -1,15 +1,16 @@
 import { o7Icon } from '@o7/icon/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'vite';
-import {
-  buildBasePath,
-  rewriteDiscoveryUrl,
-} from './scripts/subpath/base-path.js';
+import { defineConfig, type Connect } from 'vite';
+import { basePath, rewriteDiscoveryUrl } from './scripts/subpath/base-path.js';
 import { VitePWA, type VitePWAOptions } from 'vite-plugin-pwa';
 
-const base = buildBasePath();
-const scope = `${base}/`;
+const scope = `${basePath}/`;
+
+const oauthDiscovery: Connect.NextHandleFunction = (req, _res, next) => {
+  rewriteDiscoveryUrl(req);
+  next();
+};
 
 const pwaOptions = {
   // SvelteKit builds client asset URLs relatively. Keep the service worker at
@@ -194,10 +195,10 @@ export default defineConfig({
     {
       name: 'airtrail-oauth-discovery',
       configureServer(server) {
-        server.middlewares.use((req, _res, next) => {
-          rewriteDiscoveryUrl(req, base);
-          next();
-        });
+        server.middlewares.use(oauthDiscovery);
+      },
+      configurePreviewServer(server) {
+        server.middlewares.use(oauthDiscovery);
       },
     },
     o7Icon(),

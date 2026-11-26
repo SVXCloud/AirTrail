@@ -36,7 +36,7 @@ test.describe('Add Flight', () => {
       iata: 'LHR',
     });
 
-    await page.goto('/');
+    await page.goto('./');
 
     // Open add flight modal by clicking the "Add flight" button in the dock
     await page.getByTestId('add-flight-button').click();
@@ -50,7 +50,7 @@ test.describe('Add Flight', () => {
           .locator('input[placeholder="Choose an airport"]')
           .first();
         await fromField.click();
-        await fromField.fill(fromAirport.iata);
+        await fromField.fill(fromAirport.iata ?? fromAirport.icao);
 
         // Wait for dropdown to appear and select the airport
         const fromOption = page
@@ -65,7 +65,7 @@ test.describe('Add Flight', () => {
           .locator('input[placeholder="Choose an airport"]')
           .nth(1);
         await toField.click();
-        await toField.fill(toAirport.iata);
+        await toField.fill(toAirport.iata ?? toAirport.icao);
 
         const toOption = page
           .getByText(toAirport.icao, { exact: true })

@@ -92,7 +92,7 @@ test('visited-countries', async ({ openAs, capture, waitForMap }) => {
 
 // The public page, seen by someone who isn't logged in.
 test('share-page', async ({ page, waitForMap, capture }) => {
-  await page.goto('/share/maya-travels');
+  await page.goto('./share/maya-travels');
   await waitForMap();
   await capture('share-page');
 });

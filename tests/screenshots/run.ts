@@ -1,3 +1,4 @@
+import { basePath } from '../../scripts/subpath/base-path.js';
 /**
  * Regenerates the documentation screenshots against a throwaway instance.
  *
@@ -122,7 +123,7 @@ const main = async () => {
     },
   });
   await waitFor(
-    async () => (await fetch(`${BASE_URL}/login`)).ok,
+    async () => (await fetch(`${BASE_URL}${basePath}/login`)).ok,
     'AirTrail',
     180_000,
   );
@@ -142,7 +143,7 @@ const main = async () => {
     {
       cwd: ROOT,
       stdio: 'inherit',
-      env: { ...process.env, SCREENSHOTS_BASE_URL: BASE_URL },
+      env: { ...process.env, SCREENSHOTS_BASE_URL: `${BASE_URL}${basePath}/` },
     },
   );
 
@@ -160,7 +161,7 @@ const main = async () => {
 const cleanup = async () => {
   if (keep) {
     console.log(
-      `\nLeft running: ${BASE_URL} (docker rm -f ${DB_CONTAINER} to stop the database)`,
+      `\nLeft running: ${BASE_URL}${basePath}/ (docker rm -f ${DB_CONTAINER} to stop the database)`,
     );
     return;
   }

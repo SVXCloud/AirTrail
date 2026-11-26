@@ -51,7 +51,7 @@ test.describe('Edit Flight', () => {
         }),
       );
     }
-    await page.goto('/');
+    await page.goto('./');
     await page.getByTestId('list-flights-button').click();
 
     const listModal = page

@@ -71,7 +71,7 @@ export const test = base.extend<ShotFixtures>({
     await use(async (account, path = '/') => {
       const state = JSON.parse(await readFile(authStatePath(account), 'utf8'));
       await page.context().addCookies(state.cookies);
-      await page.goto(path);
+      await page.goto(path.replace(/^\//, './'));
       await settle(page);
     });
   },

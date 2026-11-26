@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { chromium } from 'playwright';
-import { normalizeBasePath } from '../../scripts/subpath/base-path.js';
+import { basePath as base } from '../../scripts/subpath/base-path.js';
 
 const origin = process.env.TEST_ORIGIN ?? 'http://localhost:3000';
-const base = normalizeBasePath(process.env.BASE_PATH);
 const protocol = new URL(origin).protocol;
 
 test(

@@ -25,7 +25,7 @@ test.describe('Shared flight list', () => {
       .values({ userId: user.id, slug, showFlightList: true })
       .execute();
 
-    await page.goto(`/share/${slug}`);
+    await page.goto(`./share/${slug}`);
     await page.getByRole('button', { name: 'Flight List' }).click();
     await expect(page.getByText('All Flights')).toBeVisible();
 

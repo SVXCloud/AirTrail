@@ -7,7 +7,7 @@ test.describe('Onboarding', () => {
     const { user } = await usersFactory.create();
     await login(page, user);
 
-    await page.goto('/?onboarding');
+    await page.goto('./?onboarding');
 
     const onboardingHeading = page.getByRole('heading', {
       level: 2,
@@ -27,7 +27,7 @@ test.describe('Onboarding', () => {
     const { user } = await usersFactory.create();
     await login(page, user);
 
-    await page.goto('/?onboarding');
+    await page.goto('./?onboarding');
 
     await expect(
       page.getByRole('heading', {

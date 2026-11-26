@@ -13,7 +13,7 @@ RUN --mount=type=secret,id=registry_ca \
 COPY . .
 
 ENV NODE_ENV=production
-RUN AIRTRAIL_TEMPLATE_BUILD=1 bun run build
+RUN bun run build
 
 FROM oven/bun:debian AS install
 WORKDIR /app
@@ -26,7 +26,7 @@ FROM node:22-slim AS release
 WORKDIR /app
 COPY --from=install /app/node_modules node_modules
 COPY --from=build /app/build build
-COPY --from=airport_overlay /airport-overlay.pmtiles /app/build/client/__airtrail_deployment_base__/airport-overlay.pmtiles
+COPY --from=airport_overlay /airport-overlay.pmtiles /app/build/client/air/airport-overlay.pmtiles
 COPY --from=build /app/package.json .
 COPY --from=build /app/prisma/migrations ./prisma/migrations
 
@@ -42,7 +42,6 @@ RUN chmod -R a+rX /app/build /app/bin /app/docker /app/prisma /app/scripts /app/
 
 ENV PATH="${PATH}:/app/bin"
 ENV BODY_SIZE_LIMIT=20M
-ENV AIRTRAIL_BUILD_IS_TEMPLATE=1
 
 ENV PUID=1000 PGID=1000
 RUN mkdir -p /app/uploads && chown node:node /app/uploads

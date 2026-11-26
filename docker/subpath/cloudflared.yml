@@ -1,6 +1,6 @@
 # Use these ingress rules in your existing remotely or locally managed tunnel.
 ingress:
   - hostname: flights.example.com
-    path: ^(/airtrail(/.*)?|/\.well-known/oauth-authorization-server/airtrail|/\.well-known/oauth-protected-resource/airtrail/api/(v1|mcp))$
+    path: ^(/air(/.*)?|/\.well-known/oauth-authorization-server/air|/\.well-known/oauth-protected-resource/air/api/(v1|mcp))$
     service: http://127.0.0.1:3000
   - service: http_status:404

@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
 import { randomUUID, createHash } from 'node:crypto';
 import { test } from 'node:test';
-import { normalizeBasePath } from '../../scripts/subpath/base-path.js';
+import { basePath as base } from '../../scripts/subpath/base-path.js';
 
 const origin = process.env.TEST_ORIGIN ?? 'http://localhost:3000';
-const base = normalizeBasePath(process.env.BASE_PATH);
 /** @param {string} path */
 const url = (path) => origin + base + path;
 /** @param {string} path @param {RequestInit} [options] */
@@ -39,7 +38,7 @@ const json = async (response, status) =>
 /** @param {string | undefined} cookie */
 const assertCookie = (cookie) => {
   assert.ok(cookie, 'Expected a Set-Cookie header');
-  assert.ok(cookie.split('; ').includes('Path=' + (base || '/')));
+  assert.ok(cookie.split('; ').includes('Path=' + base));
   return cookie;
 };
 
@@ -52,10 +51,8 @@ const redirectLocation = (response) => {
 
 test('routing, generated assets, manifest, service worker, and API documentation', async () => {
   assert.equal(await body(await get('/api/ping'), 200), 'pong');
-  if (base) {
-    const root = await fetch(origin + '/api/ping', { redirect: 'manual' });
-    assert.equal(root.status, 404);
-  }
+  const root = await fetch(origin + '/api/ping', { redirect: 'manual' });
+  assert.equal(root.status, 404);
   const manifest = await json(await get('/manifest.webmanifest'), 200);
   assert.equal(manifest.scope, base + '/');
   assert.equal(manifest.start_url, base + '/');
@@ -64,8 +61,12 @@ test('routing, generated assets, manifest, service worker, and API documentation
     assert.equal((await fetch(origin + icon.src)).status, 200);
   }
   const worker = await body(await get('/sw.js'), 200);
-  assert.doesNotMatch(worker, /__airtrail_deployment_base__/);
+  assert.match(worker, /precache/);
   assert.equal((await get('/countries-bounds.json')).status, 200);
+  const overlay = await get('/airport-overlay.pmtiles', {
+    headers: { Range: 'bytes=0-6' },
+  });
+  assert.equal(await body(overlay, 206), 'PMTiles');
   assert.match(
     await body(await get('/api/v1/openapi.yaml'), 200),
     /openapi: 3\.1\.0/,
@@ -79,29 +80,17 @@ test('routing, generated assets, manifest, service worker, and API documentation
   });
 });
 
-test('account setup or existing login, CSRF, tRPC, attachments, and public shares', async () => {
+test('account setup, login, CSRF, tRPC, attachments, and public shares', async () => {
   const login = await json(await get('/login/__data.json'), 200);
-  if (process.env.EXPECT_EMPTY_DB === '1') {
-    assert.deepEqual(login, { type: 'redirect', location: base + '/setup' });
-    const setup = await body(await get('/setup'), 200);
-    assert.ok(
-      setup.includes(base + '/api/users/setup') ||
-        setup.includes(base + '/_app/'),
-    );
-    const result = await form('/api/users/setup', {
-      username,
-      password,
-      displayName: 'Deployment Test',
-    });
-    assert.equal((await json(result, 303)).location, base + '/');
-  } else {
-    assert.equal(login.type, 'data');
-    const html = await body(await get('/login'), 200);
-    assert.ok(
-      html.includes(base + '/_app/'),
-      'HTML must reference the mounted client bundle',
-    );
-  }
+  assert.deepEqual(login, { type: 'redirect', location: base + '/setup' });
+  const setup = await body(await get('/setup'), 200);
+  assert.ok(setup.includes(base + '/_app/'));
+  const created = await form('/api/users/setup', {
+    username,
+    password,
+    displayName: 'Deployment Test',
+  });
+  assert.equal((await json(created, 303)).location, base + '/');
   assert.equal(
     (
       await form(

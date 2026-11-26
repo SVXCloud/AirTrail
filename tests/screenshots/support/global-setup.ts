@@ -1,3 +1,4 @@
+import { basePath } from '../../../scripts/subpath/base-path.js';
 import { mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
@@ -24,11 +25,11 @@ export default async function globalSetup() {
     for (const account of Object.keys(ACCOUNTS) as DemoAccount[]) {
       const context = await browser.newContext({ baseURL });
       const page = await context.newPage();
-      await page.goto('/login');
+      await page.goto('./login');
       await page.fill('input[name="username"]', ACCOUNTS[account].username);
       await page.fill('input[name="password"]', DEMO_PASSWORD);
       await page.click('button[type="submit"]');
-      await page.waitForURL((url) => url.pathname === '/', {
+      await page.waitForURL((url) => url.pathname === basePath + '/', {
         waitUntil: 'commit',
       });
       await context.storageState({ path: authStatePath(account) });

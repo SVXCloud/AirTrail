@@ -29,7 +29,7 @@ test.describe('OAuth', () => {
       name: user.displayName,
     });
 
-    await page.goto('/login');
+    await page.goto('./login');
     const authorizeRequestPromise = page.waitForRequest((request) =>
       request.url().startsWith('http://127.0.0.1:3001/auth?'),
     );
@@ -100,7 +100,7 @@ test.describe('OAuth', () => {
       });
     });
 
-    await page.goto('/login');
+    await page.goto('./login');
     const callbackResponsePromise = page.waitForResponse(
       (response) =>
         response.url().endsWith('/api/oauth/callback') &&

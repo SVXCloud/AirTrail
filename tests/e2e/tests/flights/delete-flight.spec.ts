@@ -49,7 +49,7 @@ test.describe('Delete Flight', () => {
       flightNumber: 'BA100',
     });
 
-    await page.goto('/');
+    await page.goto('./');
 
     // Open flights list modal
     await page.getByTestId('list-flights-button').click();
@@ -146,7 +146,7 @@ test.describe('Delete Flight', () => {
       duration: 43200,
     });
 
-    await page.goto('/');
+    await page.goto('./');
 
     // Open flights list modal
     await page.getByTestId('list-flights-button').click();

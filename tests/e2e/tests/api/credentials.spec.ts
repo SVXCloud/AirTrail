@@ -1,3 +1,4 @@
+import { basePath } from '../../../../scripts/subpath/base-path.js';
 import { createHash, randomUUID } from 'node:crypto';
 
 import type { APIRequestContext } from '@playwright/test';
@@ -10,8 +11,8 @@ import type { ApiScope } from '$lib/api/v1/scopes';
 import { hashSha256 } from '$lib/server/utils/hash';
 
 const ORIGIN = 'http://localhost:3000';
-const API_V1 = `${ORIGIN}/api/v1`;
-const MCP = `${ORIGIN}/api/mcp`;
+const API_V1 = `${ORIGIN}${basePath}/api/v1`;
+const MCP = `${ORIGIN}${basePath}/api/mcp`;
 
 const bearer = (token: string) => ({ Authorization: `Bearer ${token}` });
 
@@ -81,10 +82,10 @@ test.describe('scoped API keys', () => {
     const { user } = await usersFactory.create();
     const key = await createApiKey(user.id, ['profile.read']);
 
-    const me = await request.get('/api/v1/me', { headers: bearer(key) });
+    const me = await request.get('./api/v1/me', { headers: bearer(key) });
     expect(me.status()).toBe(200);
 
-    const flights = await request.get('/api/v1/flights', {
+    const flights = await request.get('./api/v1/flights', {
       headers: bearer(key),
     });
     expect(flights.status()).toBe(403);
@@ -92,7 +93,7 @@ test.describe('scoped API keys', () => {
       error: { code: 'insufficient_scope' },
     });
 
-    const legacy = await request.get('/api/flight/list', {
+    const legacy = await request.get('./api/flight/list', {
       headers: bearer(key),
     });
     expect(legacy.status()).toBe(403);
@@ -121,13 +122,13 @@ test.describe('scoped API keys', () => {
       passengers: passengers.map((userId) => ({ userId })),
     });
 
-    const withOther = await request.post('/api/v1/flights', {
+    const withOther = await request.post('./api/v1/flights', {
       headers: bearer(key),
       data: flight([user.id, other.id]),
     });
     expect(withOther.status()).toBe(403);
 
-    const alone = await request.post('/api/v1/flights', {
+    const alone = await request.post('./api/v1/flights', {
       headers: bearer(key),
       data: flight([user.id]),
     });
@@ -145,11 +146,11 @@ test.describe('OAuth tokens', () => {
       ['profile.read', 'flight.read.own'],
       MCP,
     );
-    const token = await request.post('/oauth/token', { form: exchange });
+    const token = await request.post('./oauth/token', { form: exchange });
     expect(token.status()).toBe(200);
     const { access_token } = await token.json();
 
-    for (const path of ['/api/v1/me', '/api/flight/list']) {
+    for (const path of ['./api/v1/me', './api/flight/list']) {
       const response = await request.get(path, {
         headers: bearer(access_token),
       });
@@ -164,19 +165,19 @@ test.describe('OAuth tokens', () => {
       ['profile.read'],
       API_V1,
     );
-    const first = await request.post('/oauth/token', { form: exchange });
+    const first = await request.post('./oauth/token', { form: exchange });
     const { access_token } = await first.json();
     expect(
       (
-        await request.get('/api/v1/me', { headers: bearer(access_token) })
+        await request.get('./api/v1/me', { headers: bearer(access_token) })
       ).status(),
     ).toBe(200);
 
-    const replay = await request.post('/oauth/token', { form: exchange });
+    const replay = await request.post('./oauth/token', { form: exchange });
     expect(replay.status()).toBe(400);
     expect(
       (
-        await request.get('/api/v1/me', { headers: bearer(access_token) })
+        await request.get('./api/v1/me', { headers: bearer(access_token) })
       ).status(),
     ).toBe(401);
   });
@@ -190,7 +191,7 @@ test.describe('OAuth tokens', () => {
       ['profile.read'],
       API_V1,
     );
-    const first = await request.post('/oauth/token', { form: exchange });
+    const first = await request.post('./oauth/token', { form: exchange });
     const { access_token } = await first.json();
 
     const { clientId: otherClient } = await createAuthorizationCode(
@@ -198,13 +199,13 @@ test.describe('OAuth tokens', () => {
       ['profile.read'],
       API_V1,
     );
-    const foreign = await request.post('/oauth/token', {
+    const foreign = await request.post('./oauth/token', {
       form: { ...exchange, client_id: otherClient },
     });
     expect(foreign.status()).toBe(400);
     expect(
       (
-        await request.get('/api/v1/me', { headers: bearer(access_token) })
+        await request.get('./api/v1/me', { headers: bearer(access_token) })
       ).status(),
     ).toBe(200);
   });
@@ -216,10 +217,10 @@ test.describe('OAuth tokens', () => {
       API_V1,
     );
     const issued = await (
-      await request.post('/oauth/token', { form: exchange })
+      await request.post('./oauth/token', { form: exchange })
     ).json();
     const refresh = (refreshToken: string) =>
-      request.post('/oauth/token', {
+      request.post('./oauth/token', {
         form: {
           grant_type: 'refresh_token',
           refresh_token: refreshToken,
@@ -231,7 +232,7 @@ test.describe('OAuth tokens', () => {
   };
   const meStatus = async (request: APIRequestContext, accessToken: string) =>
     (
-      await request.get('/api/v1/me', { headers: bearer(accessToken) })
+      await request.get('./api/v1/me', { headers: bearer(accessToken) })
     ).status();
 
   test('reusing a refresh token revokes its family', async ({ request }) => {
@@ -275,7 +276,7 @@ test.describe('OAuth tokens', () => {
       API_V1,
     );
     const issued = await (
-      await request.post('/oauth/token', { form: exchange })
+      await request.post('./oauth/token', { form: exchange })
     ).json();
     await db
       .updateTable('oauthGrant')
@@ -283,7 +284,7 @@ test.describe('OAuth tokens', () => {
       .where('id', '=', grantId)
       .execute();
 
-    const rotated = await request.post('/oauth/token', {
+    const rotated = await request.post('./oauth/token', {
       form: {
         grant_type: 'refresh_token',
         refresh_token: issued.refresh_token,
@@ -297,7 +298,7 @@ test.describe('OAuth tokens', () => {
 
 test.describe('browser clients', () => {
   test('can read the bearer challenge cross-origin', async ({ request }) => {
-    const response = await request.post('/api/mcp', {
+    const response = await request.post('./api/mcp', {
       headers: { Origin: 'http://127.0.0.1:6274' },
       data: {},
     });
